@@ -1,0 +1,442 @@
+<html>
+<title>CAR DEALERSHIP SYSTEM</title>
+
+<head>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <style>
+        .tablecss {
+            font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+            border-collapse: collapse;
+            width: 98%;
+        }
+
+        .tablecss td,
+        .tablecss th {
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+
+        .tablecss tr:nth-child(odd) {
+            background-color: #f2f2f2;
+        }
+
+        .tablecss tr:hover {
+            background-color: #ddd;
+        }
+
+        .tablecss th {
+            padding-top: 12px;
+            padding-bottom: 12px;
+            text-align: center;
+            background-color: lavender;
+            color: black;
+            font-weight: bold;
+        }
+    </style>
+
+
+
+
+
+    <style>
+        .footer {
+            position: fixed;
+            left: 0;
+            bottom: 0;
+            width: 100%;
+            background-color: salmon;
+            color: white;
+            text-align: center;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<script>
+    let storecarReg = [];
+    const emailid = sessionStorage.getItem("email");
+
+    function performAjax(httpMethod, url, params) {
+        const myPromise = new Promise((resolve, reject) => {
+            var xhttp = new XMLHttpRequest();
+            xhttp.onreadystatechange = function () {
+                if (this.readyState == 4 && this.status == 200) {
+                    resolve(this.responseText);
+
+                }
+                if (this.status == 500) {
+                    reject({ error: true, message: "ServerError" });
+                }
+                if (this.status == 404) {
+                    reject({ error: true, message: "Resource not found" });
+                }
+            };
+            xhttp.open(httpMethod, url, true);
+            xhttp.setRequestHeader("Content-Type", "application/json");
+            params ? xhttp.send(params) : xhttp.send();
+        });
+        return myPromise;
+    }
+
+    function loadcarData() {
+        const getStorecarPromise = performAjax("GET", "http://localhost:4000/SellerBuyer/viewstorecar?cartype=Lease");
+        getStorecarPromise
+            .then((RegList) => {
+                loadstorecar(RegList);
+            })
+            .catch(err => {
+                alert(err.message);
+            })
+    }
+
+    function loadstorecar(records) {
+        record = JSON.parse(records);
+        const tableHeader = `<tr><th>Sno</th><th>Type</th><th>EmailId</th><th>VName</th><th>BName</th><th>VehicleModel</th><th>YearOfReg</th><th>FuelType</th><th>Kmsdriven</th><th>Price</th><th>Colour</th><th>RegCity</th><th>Description</th><th>Image</th><th>Status</th><th>Actions</th></tr>`;
+        if (record.length > 0) {
+            let tableRows = record.map((store, index) => {
+                if (emailid !== store.emailid) {
+                    return `<tr><td>${index + 1}</td><td>${store.cartype}</td><td>${store.emailid}</td><td>${store.vehiclename}</td><td>${store.brandnames}</td><td>${store.vehiclemodel}</td><td>${store.yearofreg}</td><td>${store.fueltype}</td><td>${store.kmsdriven}</td><td>${store.price}</td><td>${store.colour}</td><td>${store.regcity}</td><td>${store.description}</td><td> <img src="${store.image}" style="height:50px;width:50px"></td><td>${store.status}</td><td><a style="color:red" data-toggle="modal" data-target="#LeaseCarModel" data-backdrop="static" data-keyboard="false" onclick="OpenLeaseCarsPage('${store.status}','${store.emailid}','${store.vehiclename}','${store.price}')" ><b>LEASECAR</b></a><br/><a style="color:blue" data-toggle="modal" data-target="#TestCarModel" data-backdrop="static" data-keyboard="false" onclick="OpenTestCarsPage('${store.emailid}')"><b>TESTDRIVE</b></a></td></tr>`;
+                }
+            });
+            document.getElementById("car_table").innerHTML = `${tableHeader}${tableRows.join('')}`;
+        }
+        else {
+            tableRow = `<tr><td colspan="12" align="center">No Data Found</td></tr>`;
+            document.getElementById("car_table").innerHTML = `${tableHeader}${tableRow}`;
+        }
+    }
+
+    function OpenLeaseCarsPage(status,emailid,vehiclename,price) {
+        document.getElementById("lsemailid").value=emailid;
+        document.getElementById("lcarid").value=vehiclename;
+        document.getElementById("lamount").value=price;
+
+    }
+
+    function OpenTestCarsPage(email) {
+        sessionStorage.setItem("tempemail", email);
+        $("TestCarModel").modal();
+    }
+
+
+
+
+
+    function leasecar() {
+        event.preventDefault();
+        // const id = document.getElementById("id").value;
+        const lsemailid = document.getElementById("lsemailid").value;
+        const lbemailid = document.getElementById("lbemailid").value;
+        const lcarid = document.getElementById("lcarid").value;
+        const ldate = document.getElementById("ldate").value;
+        const lamount = document.getElementById("lamount").value;
+        const lperiod = document.getElementById("lperiod").value;
+        const lcardtype = document.getElementById("lcardtype").value;
+        const lcardholder = document.getElementById("lcardholder").value;
+        const lcardnumber = document.getElementById("lcardnumber").value;
+        const lexpireddate = document.getElementById("lexpireddate").value;
+        
+            const LeaseCarPromise = performAjax(
+                "POST",
+                "http://localhost:4000/SellerBuyer/leasecar",
+                JSON.stringify({ lsemailid, lbemailid, lcarid, ldate, lamount, lperiod, lcardtype, lcardholder, lcardnumber, lexpireddate })
+            );
+            LeaseCarPromise
+                .then(newRegList => {
+                    alert(" Success");
+
+                    $('#LeaseCarModel').modal("hide");
+
+                })
+                .catch(err => {
+                    alert(err.message);
+                })
+
+        }
+    
+
+
+    function testcar() {        
+        event.preventDefault();
+        // const id = document.getElementById("id").value;
+        const source = document.getElementById("source").value;
+        const destination = document.getElementById("destination").value;
+        const tkmsdriven = document.getElementById("tkmsdriven").value;
+        const licensenumber = document.getElementById("licensenumber").value;
+        const aboutcar = document.getElementById("aboutcar").value;
+        const query = document.getElementById("query").value;
+        const temail = document.getElementById("temail").value;
+        
+            const TestCarPromise = performAjax(
+                "POST",
+                "http://localhost:4000/SellerBuyer/testcar",
+                JSON.stringify({ source, destination, tkmsdriven, licensenumber, aboutcar, query, email:sessionStorage.getItem("tempemail"), temail })
+            );
+            TestCarPromise
+                .then(newRegList => {
+                    alert('success');
+                    $('#TestCarModel').modal("hide");
+                })
+                .catch(err => {
+                    alert(err.message);
+                })
+
+        }
+
+
+</script>
+
+<body onload="loadcarData()">
+
+
+    <center>
+        <table id="car_table" border="2" class="tablecss">
+
+        </table>
+    </center>
+    <div class="modal fade" id="LeaseCarModel" role="dialog">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content" style="background-color:lightslategray;border-radius: 10px">
+                <div class="modal-header" style="background-color:white;border-radius :10px">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h3 style="color:black;text-align:center">Lease Car</h3>
+                </div>
+                <div class="modal-body">
+<form onsubmit="leasecar()">
+
+                    <br>
+                    <br>
+
+                    <div class="row">
+                        <div class="col-sm-2"></div>
+                        <div class="col-sm-3">
+                            <label for="">Seller Email id</label><br>
+
+                            <input type="email" id="lsemailid" placeholder="Enter SellerEmailiId" class="form-control"
+                               pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$" required>
+                        </div>
+                        <div class="col-sm-3">
+                            <label for="">Buyer Email id</label><br>
+
+                            <input type="email" id="lbemailid" placeholder="Enter BuyerEmailiId" class="form-control"
+                               pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$" required>
+                        </div>
+                        <div class="col-sm-3">
+                            <label for="">vehiclename</label><br>
+
+                            <input type="text" id="lcarid" placeholder="Enter CarId" class="form-control" required>
+                        </div>
+                        <div class="col-sm-1"></div>
+                    </div><br>
+
+
+                    <div class="row">
+                        <div class="col-sm-2"></div>
+                        <div class="col-sm-3">
+
+                            <label for="">Date</label><br>
+
+                            <input type="date" id="ldate" placeholder="Enter Date" class="form-control" required>
+                        </div>
+                        <div class="col-sm-3">
+                            <label for="">Amount</label><br>
+
+                            <input type="text" id="lamount" placeholder="Enter Amount" class="form-control" required>
+                        </div>
+                        <div class="col-sm-3">
+                            <label for="">Period</label><br>
+
+                            <input type="text" id="lperiod" placeholder="Enter period" class="form-control" required>
+                        </div>
+                        <div class="col-sm-1"></div>
+                    </div><br>
+
+
+                    <div class="row">
+                        <div class="col-sm-2"></div>
+                        <div class="col-sm-3">
+                            <label for="">Card Type</label><br>
+
+                            <select style="color:black" id="lcardtype" class="form-control" required>
+                                <option value="">---select--</option>
+                                <option value="DebitCard">DebitCard</option>
+                                <option value="CreditCard">CreditCard</option>
+                            </select>
+                        </div>
+                        <div class="col-sm-3">
+                            <label for="">Car holder</label><br>
+
+                            <input type="text" id="lcardholder" placeholder="Enter HolderName" class="form-control"
+                                required>
+                        </div>
+                        <div class="col-sm-3">
+                            <label for="">CardNumber</label><br>
+
+                            <input type="text" id="lcardnumber" placeholder="Enter CardNumber" class="form-control"
+                                required>
+                        </div>
+                        <div class="col-sm-1"></div>
+                    </div><br>
+
+
+                    <div class="row">
+                        <div class="col-sm-2"></div>
+                        <div class="col-sm-3">
+                            <label for="">Expire Date</label><br>
+
+                            <input type="text" id="lexpireddate" placeholder="Enter Expire Date" class="form-control"
+                                required>
+                        </div>
+                        <div class="col-sm-3">
+
+                        </div>
+                        <div class="col-sm-3">
+
+                        </div>
+                        <div class="col-sm-1"></div>
+                    </div><br>
+
+
+                    <div class="row">
+                        <div class="col-sm-2"></div>
+                        <div class="col-sm-3">
+
+                        </div>
+                        <div class="col-sm-3">
+                            <button type="submit" id="submit"
+                                class="btn btn-success">Submit</button>
+                        </div>
+                        <div class="col-sm-3">
+
+                        </div>
+                        <div class="col-sm-1"></div>
+                    </div>
+
+</form>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <br><br>
+
+
+    <div class="modal fade" id="TestCarModel" role="dialog">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content" style="background-color:lightslategray;border-radius: 10px">
+                <div class="modal-header" style="background-color:white;border-radius :10px">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h3 style="color:black;text-align:center">TestDrive </h3>
+                </div>
+                <div class="modal-body">
+<form onsubmit="testcar()">
+                    <div class="row">
+                        <div class="col-sm-1"></div>
+                        <div class="col-sm-10" style="text-align:left">
+                            <div class="row">
+                                <div class="col-sm-3"></div>
+                                <div class="col-sm-2">
+                                    <label for="">Email Id</label>
+                                </div>
+                                <div class="col-sm-3">
+                                    <input type="email" id="temail" placeholder="Enter EmailId" class="form-control"
+                                        required>
+                                </div>
+                                <div class="col-sm-4"></div>
+                            </div><br>
+                            <div class="row">
+                                <div class="col-sm-3"></div>
+                                <div class="col-sm-2">
+                                    <label for="">Source</label>
+                                </div>
+                                <div class="col-sm-3">
+                                    <input type="text" id="source" placeholder="Enter Source" class="form-control"
+                                        required>
+                                </div>
+                                <div class="col-sm-4"></div>
+                            </div><br>
+                            <div class="row">
+                                <div class="col-sm-3"></div>
+                                <div class="col-sm-2">
+                                    <label for="">Destination</label>
+                                </div>
+                                <div class="col-sm-3">
+                                    <input type="text" id="destination" placeholder="Enter Destination"
+                                        class="form-control" required>
+                                </div>
+                                <div class="col-sm-4"></div>
+                            </div><br>
+                            <div class="row">
+                                <div class="col-sm-3"></div>
+                                <div class="col-sm-2">
+                                    <label for="">KM's Driven</label>
+                                </div>
+                                <div class="col-sm-3">
+                                    <input type="text" id="tkmsdriven" placeholder="Enter KiloMeters"
+                                        class="form-control" required>
+                                </div>
+                                <div class="col-sm-4"></div>
+                            </div><br>
+                            <div class="row">
+                                <div class="col-sm-3"></div>
+                                <div class="col-sm-2">
+                                    <label for="">Licence No.</label>
+                                </div>
+                                <div class="col-sm-3">
+                                    <input type="text" id="licensenumber" placeholder="Enter LicenseNumber"
+                                        class="form-control" required>
+                                </div>
+                                <div class="col-sm-4"></div>
+                            </div><br>
+                            <div class="row">
+                                <div class="col-sm-3"></div>
+                                <div class="col-sm-2">
+                                    <label for="">About car</label>
+                                </div>
+                                <div class="col-sm-3">
+                                    <textarea rows="1" cols="20" id="aboutcar" placeholder="Enter Description"
+                                        class="form-control"></textarea>
+                                </div>
+                                <div class="col-sm-4"></div>
+                            </div><br>
+                            <div class="row">
+                                <div class="col-sm-3"></div>
+                                <div class="col-sm-2">
+                                    <label for="">Query</label>
+                                </div>
+                                <div class="col-sm-3">
+                                    <textarea rows="1" cols="20" id="query" placeholder="Enter Query"
+                                        class="form-control"></textarea>
+                                </div>
+                                <div class="col-sm-4"></div>
+                            </div><br>
+                            <div class="row">
+                                <div class="col-sm-5"></div>
+                                <div class="col-sm-2">
+                                    <button type="submit"  id="submit"
+                                        class="btn btn-success">Submit</button>
+                                </div>
+                                <div class="col-sm-5"></div>
+                            </div><br>
+
+                        </div>
+                        <div class="col-sm-1"></div>
+						
+                    </div>
+					</form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <br><br>
+
+</body>
+
+</html>

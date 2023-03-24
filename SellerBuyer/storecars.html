@@ -1,0 +1,216 @@
+<html>
+<title>CAR DEALERSHIP SYSTEM</title>
+
+<head>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <style>
+        .footer {
+            position: fixed;
+            left: 0;
+            bottom: 0;
+            width: 100%;
+            background-color: #62046F;
+            color: white;
+            text-align: center;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<script>
+
+    let storecarReg = [];
+
+    function performAjax(httpMethod, url, params) {
+        const myPromise = new Promise((resolve, reject) => {
+            var xhttp = new XMLHttpRequest();
+            xhttp.onreadystatechange = function () {
+                if (this.readyState == 4 && this.status == 200) {
+                    resolve(this.responseText);
+                }
+                if (this.status == 500) {
+                    reject({ error: true, message: "ServerError" });
+                }
+                if (this.status == 404) {
+                    reject({ error: true, message: "Resource not found" });
+                }
+            };
+            xhttp.open(httpMethod, url, true);
+            xhttp.setRequestHeader("Content-Type", "application/json");
+            params ? xhttp.send(params) : xhttp.send();
+        });
+        return myPromise;
+    }
+    function GetEmail() {
+        const emailid = sessionStorage.getItem("email");
+        document.getElementById("emailid").value = emailid;
+    }
+
+
+    function CarReg() {
+event.preventDefault();
+         const cartype = document.getElementById("type").value;
+        const emailid = document.getElementById("emailid").value;
+        const vehiclename = document.getElementById("vehiclename").value;
+        const brandnames = document.getElementById("brandnames").value;
+        const vehiclemodel = document.getElementById("vehiclemodel").value;
+        const yearofreg = document.getElementById("yearofreg").value;
+        const fueltype = document.getElementById("fueltype").value;
+        const kmsdriven = document.getElementById("kmsdriven").value;
+        const price = document.getElementById("price").value;
+        const colour = document.getElementById("colour").value;
+        const regcity = document.getElementById("regcity").value;
+        const description = document.getElementById("description").value;
+        const image = document.getElementById("image").files;
+        const status="Available";
+        if (image.length > 0) {
+            var imageToLoad = image[0];
+            var fileReader = new FileReader();
+            fileReader.onload = function (fileLoadedEvent) {
+                const image = fileLoadedEvent.target.result;
+
+            const addstorecarPromise = performAjax(
+                "POST",
+                "http://localhost:4000/SellerBuyer/storecar",
+                JSON.stringify({ cartype,emailid, vehiclename, brandnames, vehiclemodel, yearofreg, fueltype, kmsdriven, price, colour, regcity, description,image,status})
+            );
+
+            addstorecarPromise
+                .then(newRegList => {
+                    alert(" Successfully Completed");
+                })
+                .catch(err => {
+                    alert(err.message);
+                })
+            }
+                    fileReader.readAsDataURL(imageToLoad);
+                }
+
+        }
+    
+
+
+
+</script>
+
+<body onload="GetEmail()">
+    <br><br>
+	<form onsubmit="CarReg()">
+    <div class="row">
+        <div class="col-sm-2"><input type="hidden" id="id"></div>
+        <div class="col-sm-3">
+            <label for="">Type</label><br>
+
+            <input type="hidden" id="emailid" placeholder="Enter Emailid" class="form-control" pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$"required>
+            <select  id="type" class="form-control" required>
+                    <option value="">--select--</option>
+                    <option value="Buy">Sell</option>
+                    <option value="Lease">Lease</option>
+                </select>
+
+        </div>
+        <div class="col-sm-3">
+            <label for="">Vehicle</label><br>
+
+            <input type="text" id="vehiclename" placeholder="Enter Vehicle-Name" class="form-control" required>
+        </div>
+        <div class="col-sm-3">
+            <label for="">Brandname</label><br>
+
+            <input type="text" id="brandnames" placeholder="Enter BrandName" class="form-control" required>
+        </div>
+        <div class="col-sm-1"></div>
+    </div><br>
+
+
+    <div class="row">
+        <div class="col-sm-2"></div>
+        <div class="col-sm-3">
+            <label for="">Vehicle Model</label><br>
+
+            <input type="text" id="vehiclemodel" placeholder="Enter Model" class="form-control" required>
+        </div>
+        <div class="col-sm-3">
+            <label for="">Year of Registration</label><br>
+
+            <input type="text" id="yearofreg" placeholder="Enter Year" class="form-control" required>
+        </div>
+        <div class="col-sm-3">
+            <label for="">Fuel Type</label><br>
+
+            <select style="color:black" id="fueltype" class="form-control"required>
+                <option value="">--select--</option>
+                <option value="Diesel">Diesel</option>
+                <option value="Petrol">Petrol</option>
+            </select>
+        </div>
+        <div class="col-sm-1"></div>
+    </div><br>
+
+    <div class="row">
+        <div class="col-sm-2"></div>
+        <div class="col-sm-3">
+            <label for="">KM's Driven</label><br>
+
+            <input type="text" id="kmsdriven" placeholder="Enter KiloMeters" class="form-control" required>
+        </div>
+        <div class="col-sm-3">
+            <label for="">Price</label><br>
+
+            <input type="text" id="price" placeholder="Enter Price" class="form-control" required>
+        </div>
+        <div class="col-sm-3">
+            <label for="">Color</label><br>
+
+            <input type="text" id="colour" placeholder="Enter Color" class="form-control" required>
+        </div>
+        <div class="col-sm-1"></div>
+    </div><br>
+
+    <div class="row">
+        <div class="col-sm-2"></div>
+        <div class="col-sm-3">
+            <label for="">Registration City</label><br>
+
+            <input type="text" id="regcity" placeholder="Enter City" class="form-control" required>
+        </div>
+        <div class="col-sm-3">
+            <label for="">Description</label><br>
+
+            <input type="text" id="description" placeholder="Enter Description" class="form-control" required>
+        </div>
+        <div class="col-sm-3">
+                <label for="">Image</label><br>
+    
+                <input type="file" id="image" class="form-control" required>
+            </div>
+        <div class="col-sm-3">
+
+        </div>
+        <div class="col-sm-1"></div>
+    </div><br>
+    <br>
+    <div class="row">
+        <div class="col-sm-2"></div>
+        <div class="col-sm-3">
+
+        </div>
+        <div class="col-sm-3">
+            <button type="submit" style="width: 120px; font-size: 18px"  id="submit"
+                class="btn btn-success">StoreCar
+            </button>
+        </div>
+        <div class="col-sm-3">
+
+        </div>
+        <div class="col-sm-1"></div>
+    </div><br><br>
+	</form>
+</body>
+
+</html>

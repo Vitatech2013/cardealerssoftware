@@ -1,0 +1,195 @@
+<html>
+<title>CAR DEALERSHIP SYSTEM</title>
+
+<head>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <style>
+        .footer {
+            position: fixed;
+            left: 0;
+            bottom: 0;
+            width: 100%;
+            background-color: #62046F;
+            color: white;
+            text-align: center;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<script>
+
+    let SellerAndBuyer = [];
+
+
+    function performAjax(httpMethod, url, params) {
+        const myPromise = new Promise((resolve, reject) => {
+            var xhttp = new XMLHttpRequest();
+            xhttp.onreadystatechange = function () {
+                if (this.readyState == 4 && this.status == 200) {
+                    resolve(this.responseText);
+                }
+                if (this.status == 500) {
+                    reject({ error: true, message: "ServerError" });
+                }
+                if (this.status == 404) {
+                    reject({ error: true, message: "Resource not found" });
+                }
+            };
+            xhttp.open(httpMethod, url, true);
+            xhttp.setRequestHeader("Content-Type", "application/json");
+            params ? xhttp.send(params) : xhttp.send();
+        });
+        return myPromise;
+    }
+
+    function SellerBuyerLogin() {
+        event.preventDefault();
+        const emailid = document.getElementById("mail").value;
+        const password = document.getElementById("pwd").value;
+        const getLoginPromise = performAjax(
+            "GET",
+            `http://localhost:4000/SellerBuyer/sellbuylogin?emailid=${emailid}&password=${password}`
+        );
+        getLoginPromise
+            .then((loginPromise) => {
+                if (loginPromise == "" || loginPromise == null) {
+                    alert('Login Faild');
+                }
+                else {
+                    const data = JSON.parse(loginPromise);
+                    const response = [data].map(record => {
+                        return record;
+                    });
+                    response.map(res => {
+                        sessionStorage.setItem("userid", res._id);
+                        sessionStorage.setItem("name", res.completename);
+                        sessionStorage.setItem("email", res.emailid);
+                        sessionStorage.setItem("password", res.password);
+                        window.top.location.href = "SellerBuyer";
+                    });
+                }
+            })
+            .catch(err => {
+                alert(err.message);
+            })
+
+    }
+
+    function SendPassword() {
+        event.preventDefault();
+        const emailid = document.getElementById("emailid").value;
+        const searchPromise = performAjax(
+            "GET",
+            `http://localhost:4000/SellerBuyer/getpassword?emailid=${emailid}`
+        );
+        searchPromise
+        .then((response) => {
+            if (response == '[]') {
+                alert('Invalid Email Id');
+            }
+            else {
+            alert('Credentials Sent to Your Email');
+            }
+        })
+        .catch(err => {
+            alert(err.message);
+        })
+    }
+
+
+</script>
+
+<body>
+<form onsubmit="SellerBuyerLogin()">
+    <center>
+        <h3>Seller&BuyerLogin</h3>
+    </center>
+
+    <br><br>
+    <div class="row">
+        <div class="col-sm-2"></div>
+        <div class="col-sm-8">
+            <div class="row">
+                <div class="col-sm-2"></div>
+                <div class="col-sm-2">
+                    <label for="">Email</label>
+                </div>
+                <div class="col-sm-6">
+                    <input type="email" id="mail" placeholder="Enter Email-Id" class="form-control" pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$"required>
+                </div>
+                <div class="col-sm-2"></div>
+            </div><br>
+            <div class="row">
+                <div class="col-sm-2"></div>
+                <div class="col-sm-2">
+                    <label for="">Password</label></div>
+                <div class="col-sm-6">
+                    <input type="password" id="pwd" placeholder="Enter Password" class="form-control" required>
+                </div>
+                <div class="col-sm-2"></div>
+            </div><br>
+            <div class="row">
+                <div class="col-sm-4"></div>
+                <div class="col-sm-4">
+                    <button type="submit"  class="btn btn-success">LOGIN</button>
+                </div>
+                <div class="col-sm-4"></div>
+            </div><br>
+            <div class="row">
+
+                <center>
+                    <h5>If You are New User&nbsp;<a href="http://localhost:3000/SellerAndBuyerReg"
+                            style="color:rgb(236, 59, 59)">Register
+                            Here</a></h5>
+                </center>
+
+            </div>
+        </div>
+        <div class="col-sm-2"></div>
+    </div>
+<div class="row">
+        <div class="col-sm-7"></div>
+        <div class="col-sm-3"><a href="" data-toggle="modal" data-target="#myModal" style="text-decoration: none" target="iframe"> <h5>Forgot Password...?</a></h5></div>
+        <div class="col-sm-2"></div>
+    </div><br>
+</form>
+<!-- Modal PopUp -->
+<div class="modal fade" id="myModal" role="dialog">
+    <div class="modal-dialog modal-md">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Forgot Password</h4>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-sm-1"></div>
+                    <div class="col-sm-3"><label>Enter&nbsp;Valid&nbsp;EmailId</label></div>
+                    <div class="col-sm-7">
+                        <input type="email" name="emailid" id="emailid" class="form-control" placeholder="Email Id" required>
+                    </div>
+                    <div class="col-sm-1"></div>
+                </div><br><br><br>
+                <div class="row">
+                    <div class="col-sm-6"></div>
+                    <div class="col-md-5">
+                        <button type="button" id="submit" class="btn btn-info" data-dismiss="modal" onclick="SendPassword()">Send Password</button>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    </div>
+                    <div class="col-sm-1"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div> 
+
+</body>
+
+</html>

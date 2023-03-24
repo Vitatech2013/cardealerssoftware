@@ -1,0 +1,134 @@
+<html>
+<title>CAR DEALERSHIP SYSTEM</title>
+
+<head>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <style>
+        .tablecss {
+            font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+            border-collapse: collapse;
+            width: 98%;
+        }
+
+        .tablecss td,
+        .tablecss th {
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+
+        .tablecss tr:nth-child(odd) {
+            background-color: #f2f2f2;
+        }
+
+        .tablecss tr:hover {
+            background-color: #ddd;
+        }
+
+        .tablecss th {
+            padding-top: 12px;
+            padding-bottom: 12px;
+            text-align: center;
+            background-color: lavender;
+            color: black;
+            font-weight: bold;
+        }
+    </style>
+
+    <style>
+        .footer {
+            position: fixed;
+            left: 0;
+            bottom: 0;
+            width: 100%;
+            background-color: salmon;
+            color: white;
+            text-align: center;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<script>
+
+
+    let SellerAndBuyer = [];
+
+
+
+
+    function performAjax(httpMethod, url, params) {
+        const myPromise = new Promise((resolve, reject) => {
+            var xhttp = new XMLHttpRequest();
+            xhttp.onreadystatechange = function () {
+                if (this.readyState == 4 && this.status == 200) {
+                    resolve(JSON.parse(this.responseText));
+
+
+                }
+                if (this.status == 500) {
+                    reject({ error: true, message: "ServerError" });
+                }
+                if (this.status == 404) {
+                    reject({ error: true, message: "Resource not found" });
+                }
+            };
+            xhttp.open(httpMethod, url, true);
+            xhttp.setRequestHeader("Content-Type", "application/json");
+            params ? xhttp.send(params) : xhttp.send();
+        });
+        return myPromise;
+    }
+
+
+
+    function loadreg() {
+
+
+
+        const getRegPromise = performAjax("GET", "http://localhost:4000/admin/viewsellerbuyer");
+        getRegPromise
+            .then((RegList) => {
+                loadreg1(RegList);
+
+
+            })
+            .catch(err => {
+                alert(err.message);
+            })
+    }
+
+
+    function loadreg1(records) {
+        SellerAndBuyer = records;
+
+
+        const tableHeader = `<tr><th>Sno</th><th>completename</th><th>EmailId</th><th>Address</th><th>Password</th><th>MobileNo</th></tr>`;
+        if (SellerAndBuyer.length > 0) {
+            let tableRows = SellerAndBuyer.map((sellbuy, index) => {
+                return `<tr><td>${index + 1}</td><td>${sellbuy.completename}</td><td>${sellbuy.emailid}</td><td>${sellbuy.address}</td><td>${sellbuy.password}</td><td>${sellbuy.mobileno}</td></tr>`;
+            });
+            document.getElementById("Reg_table").innerHTML = `${tableHeader}${tableRows.join('')}`;
+        }
+        else {
+            tableRow = `<tr><td colspan="12" align="center">No Data Found</td></tr>`;
+            document.getElementById("Reg_table").innerHTML = `${tableHeader}${tableRow}`;
+        }
+    }
+
+</script>
+
+<body onload="loadreg()">
+
+    <center>
+        <table id="Reg_table" border="2" class="tablecss">
+
+        </table>
+    </center>
+</body>
+
+</html>

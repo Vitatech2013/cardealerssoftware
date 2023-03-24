@@ -1,0 +1,218 @@
+<html>
+<title>CAR DEALERSHIP SYSTEM</title>
+
+<head>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <style>
+        .footer {
+            position: fixed;
+            left: 0;
+            bottom: 0;
+            width: 100%;
+            background-color: #62046F;
+            color: white;
+            text-align: center;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<script>
+
+    let SellerAndBuyer = [];
+
+
+    function performAjax(httpMethod, url, params) {
+        const myPromise = new Promise((resolve, reject) => {
+            var xhttp = new XMLHttpRequest();
+            xhttp.onreadystatechange = function () {
+                if (this.readyState == 4 && this.status == 200) {
+                    resolve(JSON.parse(this.responseText));
+                }
+                if (this.status == 500) {
+                    reject({ error: true, message: "ServerError" });
+                }
+                if (this.status == 404) {
+                    reject({ error: true, message: "Resource not found" });
+                }
+            };
+            xhttp.open(httpMethod, url, true);
+            xhttp.setRequestHeader("Content-Type", "application/json");
+            params ? xhttp.send(params) : xhttp.send();
+        });
+        return myPromise;
+    }
+
+
+    function SellerAndBuyerReg() {
+        event.preventDefault();
+        // const id = document.getElementById("id").value;
+        const completename = document.getElementById("completename").value;
+        const emailid = document.getElementById("emailid").value;
+        const address = document.getElementById("address").value;
+        const password = document.getElementById("password").value;
+        const mobileno = document.getElementById("mobileno").value;
+     
+
+
+        const addcomPromise = performAjax(
+            "POST",
+              "http://localhost:4000/sellerbuyer/register",
+               JSON.stringify({ completename, emailid, address, password, mobileno })
+
+            );
+            addcomPromise
+                .then((res) => {
+                    alert('Successfully UserRegistered"');
+                })
+                .catch(err => {
+                    alert(err.message);
+                    alert('Successfully not UserRegistered"');
+
+                })
+
+
+
+        
+        //     const addSellerBuyerPromise = performAjax(
+        //         "POST",
+        //         "http://localhost:4000/SellerBuyer/register",
+        //         JSON.stringify({ completename, emailid, address, password, mobileno })
+        //     );
+           
+           
+        //     addSellerBuyerPromise
+        //         .then(newRegList => {
+        //             alert(" Success");
+        //         })
+        //         .catch(err => {
+        //             alert(err.message);
+        //         })
+
+        // }
+
+    
+        }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<body>
+<form onsubmit="SellerAndBuyerReg()">
+    <br><br>
+
+    <div class="row">
+        <div class="col-sm-3"><br><input type="hidden" id="id" class="form-control"></div>
+        <div class="col-sm-2">
+            <label for="">Complete Name</label>
+        </div>
+        <div class="col-sm-4">
+            <input type="text" id="completename" placeholder="Enter your Name" class="form-control" required>
+        </div>
+        <div class="col-sm-3"></div>
+
+    </div><br>
+    <div class="row">
+        <div class="col-sm-3"></div>
+        <div class="col-sm-2">
+            <label for="">Email Id</label>
+        </div>
+        <div class="col-sm-4">
+            <input type="email" id="emailid" placeholder="Enter your Email-Id" class="form-control"pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$" required>
+        </div>
+        <div class="col-sm-3"></div>
+
+    </div><br>
+    <div class="row">
+        <div class="col-sm-3"></div>
+        <div class="col-sm-2">
+            <label for="">Address</label>
+        </div>
+        <div class="col-sm-4">
+            <input type="text" id="address" placeholder="Enter Your Address" class="form-control" required>
+        </div>
+        <div class="col-sm-3"></div>
+
+    </div><br>
+    <div class="row">
+        <div class="col-sm-3"></div>
+        <div class="col-sm-2">
+            <label for="">Password</label>
+        </div>
+        <div class="col-sm-4">
+            <input type="password" id="password" placeholder="Enter Password" class="form-control" required>
+        </div>
+        <div class="col-sm-3"> </div>
+    </div>
+
+    <br>
+    <div class="row">
+        <div class="col-sm-3"></div>
+        <div class="col-sm-2">
+            <label for="">Mobile No.</label>
+        </div>
+        <div class="col-sm-4">
+            <input type="text" id="mobileno" placeholder="Enter your Mobile.No" class="form-control"  maxlength="10" required pattern="[6-9]{1}[0-9]{9}">
+        </div>
+        <div class="col-sm-3"></div>
+
+    </div><br>
+    <div class="row">
+        <div class="col-sm-5"></div>
+        <div class="col-sm-4">
+            <button type="submit"  id="submit" class="btn btn-success">Register</button>
+        </div>
+        <div class="col-sm-3"></div>
+
+    </div>
+    </div><br><br>
+    <div class="col-sm-2"></div>
+    <br>
+    </div><br>
+</form>
+</body>
+
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
